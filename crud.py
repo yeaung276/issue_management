@@ -2,33 +2,34 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import mode
 import models,schemas
 
-def get_user(db:Session,user_id:int):
-    return db.query(models.User).filter(models.User.id==user_id).first()
+from fastapi import HTTPException,status
 
-def get_user_by_email(db:Session,email:str):
-    return db.query(models.User).filter(models.User.email==email).first()
+def get_all_items(db:Session):
+    return db.query(models.Item).all()
 
-def get_users(db:Session,skip:int=0,limit:int=100):
-    return db.query(models.User).offset(skip).limit(limit).all()
+def get_item(db:Session,id:int):
+    return db.query(models.Item).get(id)
 
-def get_items(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.Item).offset(skip).limit(limit).all()
-
-def create_user(db:Session,user:schemas.UserCreate):
-    fake_hashed_password =user.password +"my wife will be aye myat myint"
-    db_user=models.User(email=user.email,hashed_password=fake_hashed_password)
-    db.add(db_user)
+def create_item(db:Session,item:dict):
+    new_item = models.Item(**item)
+    db.add(new_item)
     db.commit()
-    db.refresh(db_user)
-    return db_user
+    db.refresh(new_item)
+    return new_item
 
-def create_user_item(db:Session,item:schemas.ItemCreate,user_id:int):
-    db_item =models.Item(**item.dict(),owner_id=user_id)
-    db.add(db_item)
+def update_item(db:Session,id:int,item:dict):
+    item = db.query(models.Item).get(id)
+    if item is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Resource not found!")
+    for key,value in item.items():
+        setattr(item,key,value)
     db.commit()
-    db.refresh(db_item)
-    return db_item
+    db.refresh(item)
+    return item
 
-def delete_user(db:Session,user_id:int):
-   return db.query(models.User).filter(models.User.id==user_id).delete()    
+def delete_item(db:Session,id:int):
+    item = db.query(models.Item).get(id)
+    db.delete(item)
+    db.commit()
+    return {"detail": "Operation Succeed!"}
     

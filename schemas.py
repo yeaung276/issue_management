@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List,Optional
 from pydantic import BaseModel
 
@@ -11,8 +12,8 @@ class ItemBase(BaseModel):
     issue_type:str
     short_term_solution:Optional[str]=None
     long_term_solution:Optional[str]=None
-    start_date:str
-    close_date:Optional[str]=None
+    start_date:datetime
+    close_date:Optional[datetime] = None
     number_of_days:Optional[int]=None
     priority:Optional[str]=None
     status:str
