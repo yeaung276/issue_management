@@ -21,7 +21,7 @@ def update_item(db:Session,id:int,item:dict):
     reqitem = db.query(models.Item).get(id)
     if reqitem is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Resource not found!")
-    for key,value in item.items():
+    for key,value in item.dict().items():
         setattr(reqitem,key,value)
     db.commit()
     db.refresh(item)
